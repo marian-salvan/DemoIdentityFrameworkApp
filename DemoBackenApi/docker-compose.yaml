@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  webapi:
+    image: mcr.microsoft.com/dotnet/aspnet:9.0
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:80"
+    depends_on:
+      - db
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Host=db;Database=weatherdb;Username=postgres;Password=yourpassword
+
+  db:
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: weatherdb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: yourpassword
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
