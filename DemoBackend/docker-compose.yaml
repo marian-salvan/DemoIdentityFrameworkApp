@@ -12,7 +12,7 @@ services:
       - db
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DefaultConnection=Host=db;Database=weatherdb;Username=postgres;Password=test
+      - ConnectionStrings__DefaultConnection=Host=db;Database=postgres;Username=postgres;Password=test
 
   db:
     image: postgres:latest
