@@ -1,8 +1,0 @@
-@DemoBackenApi_HostAddress = https://localhost:32769
-
-GET {{DemoBackenApi_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###
-
-
