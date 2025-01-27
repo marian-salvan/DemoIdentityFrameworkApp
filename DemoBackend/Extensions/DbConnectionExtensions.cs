@@ -14,8 +14,10 @@ namespace DemoBackend.Extensions
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseNpgsql(connectionString));
 
-            services.AddDataProtection(); //this service is required by the DataProtectorTokenProvider used in ASP.NET Core Identity
+            //this service is required by the DataProtectorTokenProvider used in ASP.NET Core Identity
+            services.AddDataProtection();
 
+            //Identity configuration
             services.AddIdentityCore<UserEntity>(options =>
             {
                 options.Password.RequireNonAlphanumeric = false;
@@ -27,6 +29,7 @@ namespace DemoBackend.Extensions
            .AddEntityFrameworkStores<ApplicationDbContext>()
            .AddTokenProvider<DataProtectorTokenProvider<UserEntity>>(TokenOptions.DefaultProvider);
 
+            //this is required to be able to use the UserManager service with the UserEntity
             services.TryAddScoped<UserManager<UserEntity>>();
         }
     }
