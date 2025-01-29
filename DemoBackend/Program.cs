@@ -1,6 +1,8 @@
-using DemoBackend;
+using DemoBackend.Configuration;
+using DemoBackend.Data;
 using DemoBackend.Extensions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,6 +14,16 @@ builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 
 builder.Services.AddIdentityDbContext(builder);
+
+
+builder.Services.Configure<AuthenticationSettings>(builder.Configuration.GetSection("Authentication"));
+
+
+//register TokensRepository
+builder.Services.TryAddScoped<ITokensRepository, TokensRepository>();
+
+//register the authentication settings
+builder.Services.AddJwtAuthentication(builder.Configuration);
 
 var app = builder.Build();
 
@@ -33,6 +45,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 

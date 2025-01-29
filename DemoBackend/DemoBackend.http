@@ -1,6 +1,52 @@
 @DemoBackend_HostAddress = http://localhost:8080
+@AccessToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImNkMTI1ZWVmLWMwNTAtNDcwOS1hNmNmLTI2ZjE0NGQyYzM0NSIsImVtYWlsIjoidGVzdHVzZXJAZXhhbXBsZS5jb20iLCJhZ2UiOiIyNSIsInJvbGUiOiJVU0VSIiwianRpIjoiMzkwODVkZGItOWMyYy00NDRlLWFlMmMtYTJlYWMyMTFjNTI4IiwibmJmIjoxNzM4MTQ5NTA5LCJleHAiOjE3MzgxNTA0MDksImlzcyI6Imh0dHA6Ly9sb2NhbGhvc3Q6MzI3NzIiLCJhdWQiOiJteS13ZWItYXBpLWNsaWVudCJ9.KX4eZ3Zwq0oZNsnVTsm0r8HFDbagqxyqok7rPy2uhFE
+@RefreshToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYmYiOjE3MzgxNDk1MDksImV4cCI6MTczODE5MjcwOSwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDozMjc3MiIsImF1ZCI6Im15LXdlYi1hcGktY2xpZW50In0.Rx-xG_bUMFQUCJ_OMrsi6_ZgtVv2QCzlRzDTtxk801g
 
+### Register User
+POST {{DemoBackend_HostAddress}}/api/usermanagement/register
+Content-Type: application/json
+
+{
+  "email": "testuser@example.com",
+  "password": "Test@1234",
+  "confirmPassword": "Test@1234",
+  "role": "USER",
+  "age": 25
+}
+
+###
+
+### Login User
+POST {{DemoBackend_HostAddress}}/api/usermanagement/login
+Content-Type: application/json
+
+{
+  "email": "testuser@example.com",
+  "password": "Test@1234"
+}
+
+###
+
+### Refresh Token
+POST {{DemoBackend_HostAddress}}/api/usermanagement/refresh-token
+Authorization: Bearer {{AccessToken}}
+Content-Type: application/json
+
+{
+  "refreshToken": {{RefreshToken}}
+}
+
+###
+
+### Logout User
+POST {{DemoBackend_HostAddress}}/api/usermanagement/logout
+Authorization: Bearer your-jwt-token-here
+
+###
+
+### Get Weather Forecast (Example)
 GET {{DemoBackend_HostAddress}}/weatherforecast/
+Authorization: Bearer {{AccessToken}}
 Accept: application/json
 
 ###

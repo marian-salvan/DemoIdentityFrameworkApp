@@ -13,6 +13,10 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ConnectionStrings__DefaultConnection=Host=db;Database=postgres;Username=postgres;Password=test
+      - Authentication__TokenSecret=thisisthesecretforgeneratingakey(mustbeatleast32bitlong)
+      - Authentication__RefreshTokenSecret=thisisthesecretforgeneratingakey(mustbeatleast32bitlong)
+      - Authentication__Issuer=http://localhost:8080
+      - Authentication__Audience=my-web-api-client
 
   db:
     image: postgres:latest
