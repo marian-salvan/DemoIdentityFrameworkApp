@@ -15,15 +15,17 @@ builder.Services.AddOpenApi();
 
 builder.Services.AddIdentityDbContext(builder);
 
-
+//register the authentication settings
 builder.Services.Configure<AuthenticationSettings>(builder.Configuration.GetSection("Authentication"));
-
-
-//register TokensRepository
-builder.Services.TryAddScoped<ITokensRepository, TokensRepository>();
 
 //register the authentication settings
 builder.Services.AddJwtAuthentication(builder.Configuration);
+
+//register the authorization policies
+builder.Services.AddAuthorizationPolicies();
+
+//register TokensRepository
+builder.Services.TryAddScoped<ITokensRepository, TokensRepository>();
 
 var app = builder.Build();
 

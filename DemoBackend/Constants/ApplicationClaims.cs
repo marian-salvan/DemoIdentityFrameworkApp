@@ -6,5 +6,6 @@
         public const string Email = "userEmail";
         public const string Age = "userAge";
         public const string Role = "userRole";
+        public const string AccessToPremium = "accessToPremium";
     }
 }

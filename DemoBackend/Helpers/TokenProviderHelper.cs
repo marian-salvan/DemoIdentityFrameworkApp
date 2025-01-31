@@ -21,8 +21,15 @@ namespace DemoBackend.Helpers
                 new(ApplicationClaims.Email,!string.IsNullOrEmpty(user.Email) ? user.Email : string.Empty),
                 new(ApplicationClaims.Age, user.Age.ToString()),
                 new(ApplicationClaims.Role, role.ToUpper()),
+                new(ClaimTypes.Role, role.ToUpper()),
                 new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             };
+
+            //if you are under 18 you get access to premium content
+            if (user.Age < 18)
+            {
+                claimsForToken.Add(new(ApplicationClaims.AccessToPremium, ApplicationClaims.AccessToPremium));
+            }
 
             var expirationDate = DateTime.UtcNow.AddMinutes(60);
 
