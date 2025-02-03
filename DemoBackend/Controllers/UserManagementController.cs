@@ -20,13 +20,15 @@ namespace DemoBackend.Controllers
     {
         private readonly UserManager<UserEntity> _userManager;
         private readonly AuthenticationSettings _authSettings;
+        private readonly ClientSettings _clientSettings;
         private readonly ITokensRepository _tokensRepository;
 
         public UserManagementController(UserManager<UserEntity> userManager, IOptions<AuthenticationSettings> authSettings,
-            ITokensRepository tokensRepository)
+           IOptions<ClientSettings> clientSettings, ITokensRepository tokensRepository)
         {
             _userManager = userManager;
             _authSettings = authSettings.Value;
+            _clientSettings = clientSettings.Value;
             _tokensRepository = tokensRepository;
         }
 
@@ -182,6 +184,136 @@ namespace DemoBackend.Controllers
 
                 return success ? Ok("User logged out successfully.") : Unauthorized("Invalid user.");
             } 
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        [HttpPost("send-reset-password-notification")]
+        public async Task<IActionResult> SendResetPasswordNotification([FromBody] ResetPasswordNotificationRequest resetPasswordEmailRequest)
+        {
+            try
+            {
+                var user = await _userManager.FindByEmailAsync(resetPasswordEmailRequest.Email);
+                if (user?.Email is null)
+                {
+                    return BadRequest("User with this email not found.");
+                }
+
+                var passwordResetToken = await _userManager.GeneratePasswordResetTokenAsync(user);
+                if (string.IsNullOrWhiteSpace(passwordResetToken))
+                {
+                    return StatusCode(500, $"Internal server error");
+                }
+
+                var combinedToken = $"{passwordResetToken}|{user.Id}";
+                var encryptedToken = EncryptionHelper.Encrypt(combinedToken);
+
+                //create the reset password url
+                var resetPasswordUrl = $"{_clientSettings.ClientUrl}reset-password?token={encryptedToken}";
+
+                //send email with the reset password link
+
+                //encrypted token should only be sent by email, this is just for testing purposes
+                return Ok(encryptedToken);
+            } 
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest resetPasswordRequest)
+        {
+            try
+            {
+                var decryptedToken = EncryptionHelper.Decrypt(resetPasswordRequest.Token);
+                var tokenParts = decryptedToken.Split('|');
+                if (tokenParts.Length != 2)
+                {
+                    return BadRequest("Invalid token.");
+                }
+
+                var passwordResetToken = tokenParts[0];
+                var userId = tokenParts[1];
+
+                var user = await _userManager.FindByIdAsync(userId);
+
+                if (user == null)
+                {
+                    return BadRequest("User with this email not found.");
+                }
+
+                var result = await _userManager.ResetPasswordAsync(user, passwordResetToken,
+                    resetPasswordRequest.NewPassword);
+
+                return result.Succeeded ? Ok("Password reset successfully.") : BadRequest("Password reset failed.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        [Authorize]
+        [HttpPost("send-reset-email-notification")]
+        public async Task<IActionResult> SendResetEmailNotification([FromBody] ResetEmailNotificationRequest resetEmailNotificationRequest)
+        {
+            try
+            {
+                var id = HttpContext.User.FindFirstValue(ApplicationClaims.Id);
+                if (id is null)
+                {
+                    return Unauthorized();
+                }
+
+                var user = await _userManager.FindByIdAsync(id);
+                if (user is null)
+                {
+                    return Unauthorized();
+                }
+
+                //create the reset password url
+                var emailToken = await _userManager.GenerateChangeEmailTokenAsync(user, resetEmailNotificationRequest.NewEmail);
+                var encryptedToken = EncryptionHelper.Encrypt(emailToken);
+
+                var resetPasswordUrl = $"{_clientSettings.ClientUrl}reset-email?token={encryptedToken}";
+
+                //send email with the reset email link
+
+                //encrypted token should only be sent by email, this is just for testing purposes
+                return Ok(encryptedToken);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        [Authorize]
+        [HttpPost("reset-email")]
+        public async Task<IActionResult> ResetEmail([FromBody] ResetEmailReqest resetEmailReqest)
+        {
+            try
+            {
+                var id = HttpContext.User.FindFirstValue(ApplicationClaims.Id);
+                if (id is null)
+                {
+                    return Unauthorized();
+                }
+                var user = await _userManager.FindByIdAsync(id);
+                if (user is null)
+                {
+                    return Unauthorized();
+                }
+
+                var decryptedToken = EncryptionHelper.Decrypt(resetEmailReqest.Token);
+                var result = await _userManager.ChangeEmailAsync(user, resetEmailReqest.NewEmail, decryptedToken);
+
+                return result.Succeeded ? Ok("Email changed successfully.") : BadRequest("Email change failed.");
+            }
             catch (Exception ex)
             {
                 return StatusCode(500, $"Internal server error: {ex.Message}");

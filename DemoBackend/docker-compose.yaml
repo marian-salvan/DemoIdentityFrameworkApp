@@ -17,6 +17,7 @@ services:
       - Authentication__RefreshTokenSecret=thisisthesecretforgeneratingakey(mustbeatleast32bitlong)
       - Authentication__Issuer=http://localhost:8080
       - Authentication__Audience=my-web-api-client
+      - Client__ClientUrl=https://www.my-awesome-webapp.com/
 
   db:
     image: postgres:latest

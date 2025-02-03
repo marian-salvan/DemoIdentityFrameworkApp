@@ -17,6 +17,7 @@ builder.Services.AddIdentityDbContext(builder);
 
 //register the authentication settings
 builder.Services.Configure<AuthenticationSettings>(builder.Configuration.GetSection("Authentication"));
+builder.Services.Configure<ClientSettings>(builder.Configuration.GetSection("Client"));
 
 //register the authentication settings
 builder.Services.AddJwtAuthentication(builder.Configuration);
