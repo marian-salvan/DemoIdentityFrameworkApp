@@ -25,6 +25,8 @@ builder.Services.AddJwtAuthentication(builder.Configuration);
 //register the authorization policies
 builder.Services.AddAuthorizationPolicies();
 
+builder.Services.AddSecurity();
+
 //register TokensRepository
 builder.Services.TryAddScoped<ITokensRepository, TokensRepository>();
 
@@ -48,6 +50,10 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseRateLimiter();
+
+app.UseCors();
 
 app.UseAuthentication();
 
